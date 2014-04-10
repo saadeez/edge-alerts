@@ -1,199 +1,177 @@
-/*	Edge Alerts v1.0, Copyright 2014, Joe Mottershaw, https://github.com/joemottershaw/
-//	=================================================================================== */
+//	Edge Alerts v1.1, Copyright 2014, Joe Mottershaw, https://github.com/joemottershaw/
+//	===================================================================================
 
-	(function($) {
-		$.fn.edgeAlerts = function(options) {
-			function winHeight() {
-				return window.innerHeight ? window.innerHeight : $(window).height();
-			}
+	;(function($, window, document, undefined) {
+		var pluginName = 'edgeAlerts',
+			defaults = {
+				type: 'alert',
+				title: null,
+				message: null,
+				cancelText: 'Cancel',
+				continueText: 'Continue',
+				reverseButtons: false,
+				revealSpeed: 400,
+				background: 'rgba(0, 0, 0, .8)',
+				overlayClose: true,
+				closeButton: true,
+				enterKey: true,
+				escKey: true,
+				callbackInit: function() {},
+				callbackBeforeOpen: function() {},
+				callbackAfterOpen: function() {},
+				callbackConfirm: function() {},
+				callbackBeforeClose: function() {},
+				callbackAfterClose: function() {},
+				callbackError: function() {},
+				errorMessage: 'Error loading content.'
+			};
 
-			function adjustContainer() {
-				var	elementWidth = $container.width(),
-					elementHeight = $container.height();
+		function edgeAlerts(element, options) {
+			$this = this,
+			this.element = element,
+			this.$element = $(this.element);
 
-				$container.css({ 'margin-top': '-' + elementHeight / 2 + 'px', 'margin-left': '-' + elementWidth / 2 + 'px' });
-			}
+			this.options = $.extend({}, defaults, options);
 
-			function showEdgeAlerts() {
-				// Prevent default actions and lose focus of all elements
-					$this.on('click', function(e) {
+			this._defaults = defaults,
+			this._name = pluginName;
+
+			$edgeAlerts = $('<div>', { 'class': 'edge-alerts-overlay' }),
+			$close = $('<div>', { 'class': 'edge-alerts-close' }),
+			$container = $('<div>', { 'class': 'edge-alerts-container' }),
+			$popupHead = $('<div>', { 'class': 'edge-alerts-popup-head' }),
+			$popupBody = $('<div>', { 'class': 'edge-alerts-popup-body' }),
+			$popupMessage = $('<div>', { 'class': 'edge-alerts-popup-message' }),
+			$popupButtons = $('<div>', { 'class': 'edge-alerts-popup-buttons' }),
+			$popupCancel = $('<button class="edge-alerts-popup-cancel">' + this.options.cancelText + '</div>'),
+			$popupContinue = $('<button class="edge-alerts-popup-continue">' + this.options.continueText + '</div>'),
+			$error = $('<div class="edge-alerts-error">' + this.options.errorMessage + '</div>');
+
+			keyEnter = 13,
+			keyEsc = 27;
+
+			this.init();
+		}
+
+		function winHeight() {
+			return window.innerHeight ? window.innerHeight : $(window).height();
+		}
+
+		edgeAlerts.prototype = {
+			init: function() {
+				// Element click
+					this.$element.on('click', function(e) {
 						e.preventDefault();
 					
 						$(':focus').blur();
+						$this.openEdgeAlerts();
 					});
 
-				// Open callback
-					if ($.isFunction(settings.callbackOpen)) {
-						settings.callbackOpen.call(this);
-					}
+				// Interaction
+					if ($this.options.overlayClose)
+						$edgeAlerts.on('click', function(e) {
+							if (e.target === this || $(e.target).hasClass('edge-alerts-container') || $(e.target).hasClass('edge-alerts-error'))
+								$this.closeEdgeAlerts();
+						});
 
-				// Add Edge Alerts and settings to document with close and container elements
-					if ($('.edge-alerts').size() === 0) {
-						$this.prepend($edgeAlerts.css({ 'height': winHeight(), 'background-color': settings.background }));
-
-						if (settings.closeButton) {
-							$edgeAlerts.append($close, $container);
-						} else {
-							$edgeAlerts.append($container);
-						}
-					}
-
-					$edgeAlerts.fadeIn(settings.revealSpeed);
-
-				// Adjust Edge Alerts height and container position on resize
-					$(window).resize(function() {
-						$edgeAlerts.css({ 'height': winHeight() });
-						adjustContainer();
+					$close.on('click', function() {
+						$this.closeEdgeAlerts();
 					});
 
-				// Remove Edge Alerts
-					if (settings.overlayClose) {
-						$edgeAlerts.click(function(e) {
-							hideEdgeAlerts();
-						});
-					}
-
-					if (settings.closeButton) {
-						$close.click(function(e) {
-							hideEdgeAlerts();
-						});
-					}
-
-					$(document).on('keyup', function(e) {
-						if (settings.escKey) {
-							if (e.keyCode == keyEsc) {
-								hideEdgeAlerts();
-							}
-						}
+					$popupCancel.on('click', function() {
+						$this.closeEdgeAlerts();
 					});
 
-					$error.on('click', function() {
-						hideEdgeAlerts();
+					$popupContinue.on('click', function() {
+						$this.closeEdgeAlerts();
+
+						if ($this.options.type == 'confirm')
+							$this.options.callbackConfirm.call(this);
 					});
 
-					$container.click(function(e) {
-						e.stopPropagation();
+					$('body').off('keyup').on('keyup', function(e) {
+						if ($this.options.escKey && e.keyCode === keyEsc)
+							$this.closeEdgeAlerts();
+
+						if ($this.options.enterKey && e.keyCode === keyEnter)
+							$popupContinue.trigger('click');
 					});
 
-				// Close callback
-					if ($.isFunction(settings.callbackClose)) {
-						settings.callbackClose.call(this);
-					}
-			}
+				// Callback
+					this.options.callbackInit.call(this);
+			},
 
-			function populateEdgeAlerts() {
-				showEdgeAlerts();
-
-				if ($.inArray(settings.type, types) !== -1) {
-					if (settings.title === null || settings.message === null) {
-						edgeAlertsError();
-					} else {
-						$container.append($popup);
-
-						if (settings.type == 'alert') {
-							$('.edge-alerts-popup-buttons').append('<a href="#" target="_self" class="edge-alerts-popup-continue">' + settings.alertContinueText + '</a>');
-						} else if (settings.type == 'confirm') {
-							if ($.isFunction(settings.callbackConfirm)) {
-								if (settings.reverseButtons) {
-									$('.edge-alerts-popup-buttons').append('<a href="#" target="_self" class="edge-alerts-popup-continue">' + settings.confirmContinueText + '</a><a href="#" target="_self" class="edge-alerts-popup-cancel">' + settings.confirmCancelText + '</a>');
-								} else {
-									$('.edge-alerts-popup-buttons').append('<a href="#" target="_self" class="edge-alerts-popup-cancel">' + settings.confirmCancelText + '</a><a href="#" target="_self" class="edge-alerts-popup-continue">' + settings.confirmContinueText + '</a>');
-								}
-							} else {
-								edgeAlertsError();
-							}
-						}
-
-						$('.edge-alerts-popup-buttons a').on('click', function(e) {
-							e.preventDefault();
-						});
-
-						$('.edge-alerts-popup-cancel').on('click', function() {
-							hideEdgeAlerts();
-						});
-
-						$('.edge-alerts-popup-continue').on('click', function() {
-							if (settings.type == 'confirm') {
-								settings.callbackConfirm.call(this);
-							}
-
-							hideEdgeAlerts();
-						});
-
-						$(document).on('keyup', function(e) {
-							if (settings.enterKey) {
-								if (e.keyCode == keyEnter) {
-									if (settings.type == 'alert') {
-										$('.edge-alerts-popup-continue').trigger('click');
-									} else if (settings.type == 'confirm') {
-										$('.edge-alerts-popup-confirm-continue').trigger('click');
-									}
-								}
-							}
-						});
-					}
-				} else {
-					edgeAlertsError();
-				}
-
-				adjustContainer();
-			}
-
-			function hideEdgeAlerts() {
+			openEdgeAlerts: function() {
 				// Before callback
-					if ($.isFunction(settings.callbackBeforeClose)) {
-						settings.callbackBeforeClose.call(this);
-					}
+					this.options.callbackBeforeOpen.call(this);
 
-				// Fade out Edge Alerts and remove element from document
-					$edgeAlerts.fadeOut(settings.revealSpeed, function() {
-						$edgeAlerts.remove();
+				// Build
+					$this.buildEdgeAlerts();
+					$this.adjustContent();
+
+					$(window).on('resize', function() {
+						$this.adjustContent();
 					});
 
 				// After callback
-					if ($.isFunction(settings.callbackAfterClose)) {
-						settings.callbackAfterClose.call(this);
+					this.options.callbackAfterOpen.call(this);
+			},
+
+			buildEdgeAlerts: function() {
+				// Build
+					if ($('.edge-alerts-overlay').size() === 0) {
+						$('body').prepend($edgeAlerts.css({ 'background-color': this.options.background }));
+							$edgeAlerts.append($close, $container);
+
+						if (this.options.type == 'alert' || this.options.type == 'confirm')
+							$container.append($popupHead.append(this.options.title), $popupBody.append($popupMessage.append(this.options.message), $popupButtons));
+
+							if (this.options.type == 'alert')
+								$popupButtons.append($popupContinue);
+							else if (this.options.type == 'confirm')
+								if (this.options.reverseButtons)
+									$popupButtons.append($popupContinue, $popupCancel);
+								else
+									$popupButtons.append($popupCancel, $popupContinue);
+							else
+								$this.edgeAlertsError();
+
+						$edgeAlerts.fadeIn(this.options.revealSpeed);
 					}
+			},
+
+			adjustContent: function() {
+				// Overlay to viewport
+					$edgeAlerts.css({ 'height': winHeight() });
+
+				// Center dialog
+					$container.css({ 'margin-top': '-' + $container.height() / 2 + 'px', 'margin-left': '-' + $container.width() / 2 + 'px' });
+			},
+
+			closeEdgeAlerts: function() {
+				// Before callback
+					this.options.callbackBeforeClose.call(this);
+
+				// Remove
+					$edgeAlerts.fadeOut(this.options.revealSpeed, function() {
+						$(this).remove();
+					});
+
+				// After callback
+					this.options.callbackAfterClose.call(this);
+			},
+
+			edgeAlertsError: function() {
+				// Callback
+					this.options.callbackError.call(this);
+
+				// Display
+					$container.append($error);
 			}
-
-			function edgeAlertsError() {
-				$container.empty().append($error);
-			}
-
-			// Default Settings
-				var settings = $.extend({
-					type: 'alert',
-					title: null,
-					message: null,
-					callbackConfirm: null,
-					alertContinueText: 'Continue',
-					confirmCancelText: 'Cancel',
-					confirmContinueText: 'Continue',
-					reverseButtons: false,
-					revealSpeed: 400,
-					background: 'rgba(0, 0, 0, .8)',
-					overlayClose: true,
-					closeButton: true,
-					enterKey: true,
-					escKey: true,
-					callbackOpen: null,
-					callbackClose: null,
-					errorMessage: 'It appears there was an error with the requested dialog popup.'
-				}, options),
-
-				types = ['alert', 'confirm'],
-
-				$this = this,
-				$edgeAlerts = $('<div>', { 'class': 'edge-alerts' }),
-				$close = $('<div>', { 'class': 'edge-alerts-close' }),
-				$container = $('<div>', { 'class': 'edge-alerts-container' }),
-				$popup = $('<div class="edge-alerts-popup-head">' + settings.title + '</div><div class="edge-alerts-popup-body"><div class="edge-alerts-popup-message">' + settings.message + '</div><div class="edge-alerts-popup-buttons edge-alerts-clearfix"></div></div>'),
-				$error = $('<div class="edge-alerts-error">' + settings.errorMessage + '</div>'),
-				keyEnter = 13,
-				keyEsc = 27;
-
-			// Content
-				populateEdgeAlerts();
-
 		};
-	})(jQuery);
+		
+		$.fn[pluginName] = function(options) {
+			if (!$.data(this, pluginName))
+				$.data(this, pluginName, new edgeAlerts(this, options));
+		};
+	})(jQuery, window, document);

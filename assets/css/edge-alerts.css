@@ -1,4 +1,4 @@
-/*	Edge Alerts v1.0, Copyright 2014, Joe Mottershaw, https://github.com/joemottershaw/
+/*	Edge Alerts v1.1, Copyright 2014, Joe Mottershaw, https://github.com/joemottershaw/
 //	=================================================================================== */
 
 /*	Table of Contents
@@ -10,7 +10,7 @@
 /*	#Default
 //	================================================== */
 
-	.edge-alerts {
+	.edge-alerts-overlay {
 		display: none;
 		width: 100%;
 		min-width: 280px;
@@ -20,7 +20,7 @@
 		z-index: 99999999;
 	}
 
-	.edge-alerts .edge-alerts-clearfix:after {
+	.edge-alerts-overlay .edge-alerts-clear {
 		display: block;
 		width: 0;
 		height: 0;
@@ -30,17 +30,7 @@
 		content: " ";
 	}
 
-	.edge-alerts .edge-alerts-clear {
-		display: block;
-		width: 0;
-		height: 0;
-		overflow: hidden;
-		clear: both;
-		visibility: hidden;
-		content: " ";
-	}
-
-	.edge-alerts .edge-alerts-close {
+	.edge-alerts-overlay .edge-alerts-close {
 		width: 40px;
 		height: 40px;
 		background: url('../imgs/edge-alerts-close.png') no-repeat center;
@@ -50,19 +40,19 @@
 		right: 20px;
 	}
 
-	.edge-alerts .edge-alerts-close:hover {
+	.edge-alerts-overlay .edge-alerts-close:hover {
 		opacity: 1;
 		cursor: pointer;
 	}
 
-	.edge-alerts .edge-alerts-container {
+	.edge-alerts-overlay .edge-alerts-container {
 		width: 500px;
 		position: absolute;
 		top: 50%;
 		left: 50%;
 	}
 
-	.edge-alerts .edge-alerts-popup-head {
+	.edge-alerts-overlay .edge-alerts-popup-head {
 		width: 100%;
 		height: 40px;
 		background: #0B8593;
@@ -72,7 +62,7 @@
 		line-height: 40px;
 	}
 
-	.edge-alerts .edge-alerts-popup-body {
+	.edge-alerts-overlay .edge-alerts-popup-body {
 		width: 100%;
 		background: #F4F4F4;
 		padding: 20px;
@@ -80,18 +70,27 @@
 		line-height: normal;
 	}
 
-	.edge-alerts .edge-alerts-popup-buttons {
+	.edge-alerts-overlay .edge-alerts-popup-buttons {
 		text-align: right;
 	}
 
-	.edge-alerts a.edge-alerts-popup-cancel,
-	.edge-alerts a.edge-alerts-popup-continue {
+	.edge-alerts-overlay .edge-alerts-popup-buttons:after {
+		display: block;
+		width: 0;
+		height: 0;
+		overflow: hidden;
+		clear: both;
+		visibility: hidden;
+		content: " ";
+	}
+
+	.edge-alerts-overlay button.edge-alerts-popup-cancel,
+	.edge-alerts-overlay button.edge-alerts-popup-continue {
 		display: inline-block;
 		width: auto;
 		min-width: 100px;
 		height: 32px;
-		margin-top: 20px;
-		margin-left: 20px;
+		margin: 20px 0 0 20px;
 		border: 0 solid #09707b;
 		border-bottom-width: 3px;
 		-webkit-border-radius: 3px;
@@ -100,23 +99,24 @@
 		padding: 0 10px;
 		background: #0B8593;
 		color: #FFFFFF;
+		font-size: 0.9em;
 		text-align: center;
 		line-height: 30px;
 	}
 
-	.edge-alerts a.edge-alerts-popup-cancel:hover,
-	.edge-alerts a.edge-alerts-popup-continue:hover {
+	.edge-alerts-overlay button.edge-alerts-popup-cancel:hover,
+	.edge-alerts-overlay button.edge-alerts-popup-continue:hover {
 		border-color: #0B8593;
 		background: #0D9AAB;
 	}
 
-	.edge-alerts a.edge-alerts-popup-cancel:active,
-	.edge-alerts a.edge-alerts-popup-continue:active {
+	.edge-alerts-overlay button.edge-alerts-popup-cancel:active,
+	.edge-alerts-overlay button.edge-alerts-popup-continue:active {
 		border-color: #09707b;
 		background: #0B8593;
 	}
 
-	.edge-alerts .edge-alerts-error {
+	.edge-alerts-overlay .edge-alerts-error {
 		-webkit-border-radius: 10px;
 		-moz-border-radius: 10px;
 		border-radius: 10px;
@@ -130,21 +130,21 @@
 	}
 
 	@media only screen and (max-width: 520px) {
-		.edge-alerts .edge-alerts-container {
+		.edge-alerts-overlay .edge-alerts-container {
 			width: 90%;
 			text-align: center;
 		}
 
-		.edge-alerts .edge-alerts-close {
+		.edge-alerts-overlay .edge-alerts-close {
 			display: none;
 		}
 
-		.edge-alerts .edge-alerts-popup-buttons {
+		.edge-alerts-overlay .edge-alerts-popup-buttons {
 			text-align: center;
 		}
 
-		.edge-alerts a.edge-alerts-popup-cancel,
-		.edge-alerts a.edge-alerts-popup-continue {
+		.edge-alerts-overlay button.edge-alerts-popup-cancel,
+		.edge-alerts-overlay button.edge-alerts-popup-continue {
 			width: 100%;
 			margin-left: 0;
 		}
