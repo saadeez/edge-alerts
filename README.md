@@ -1,4 +1,4 @@
-Edge Alerts v1.1
+Edge Alerts v1.2
 ================
 
 A replacement for browser default alert/confirmation dialog popups to keep design consistent across browsers and devices.
@@ -60,8 +60,8 @@ Options
 | callbackInit        | function() {}            | Calls a JavaScript function when the dialog is initiated. |
 | callbackBeforeOpen  | function() {}            | Calls a JavaScript function before the dialog is opened. |
 | callbackAfterOpen   | function() {}            | Calls a JavaScript function after the dialog is opened. |
-| callbackBeforeClose | function() {}            | Calls a JavaScript function before the dialog is closed. |
 | callbackConfirm     | function() {}            | Required callback for confirmation dialogs. |
+| callbackBeforeClose | function() {}            | Calls a JavaScript function before the dialog is closed. |
 | callbackAfterClose  | function() {}            | Calls a JavaScript function after the dialog is closed. |
 | callbackError       | function() {}            | Calls a JavaScript function when the dialog encounters an error. |
 | errorMessage        | 'Error loading content.' | Sets the error message that is displayed upon the plugin encountering an error. |

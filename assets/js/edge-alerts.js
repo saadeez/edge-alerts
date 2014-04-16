@@ -1,4 +1,4 @@
-//	Edge Alerts v1.1, Copyright 2014, Joe Mottershaw, https://github.com/joemottershaw/
+//	Edge Alerts v1.2, Copyright 2014, Joe Mottershaw, https://github.com/joemottershaw/
 //	===================================================================================
 
 	;(function($, window, document, undefined) {
@@ -27,7 +27,6 @@
 			};
 
 		function edgeAlerts(element, options) {
-			$this = this,
 			this.element = element,
 			this.$element = $(this.element);
 
@@ -59,12 +58,27 @@
 
 		edgeAlerts.prototype = {
 			init: function() {
+				$this = this;
+
 				// Element click
-					this.$element.on('click', function(e) {
-						e.preventDefault();
-					
-						$(':focus').blur();
-						$this.openEdgeAlerts();
+					$this.openEdgeAlerts();
+
+				// Callback
+					this.options.callbackInit.call(this);
+			},
+
+			openEdgeAlerts: function() {
+				$this = this;
+
+				// Before callback
+					this.options.callbackBeforeOpen.call(this);
+
+				// Build
+					$this.buildEdgeAlerts();
+					$this.adjustContent();
+
+					$(window).on('resize', function() {
+						$this.adjustContent();
 					});
 
 				// Interaction
@@ -97,27 +111,13 @@
 							$popupContinue.trigger('click');
 					});
 
-				// Callback
-					this.options.callbackInit.call(this);
-			},
-
-			openEdgeAlerts: function() {
-				// Before callback
-					this.options.callbackBeforeOpen.call(this);
-
-				// Build
-					$this.buildEdgeAlerts();
-					$this.adjustContent();
-
-					$(window).on('resize', function() {
-						$this.adjustContent();
-					});
-
 				// After callback
 					this.options.callbackAfterOpen.call(this);
 			},
 
 			buildEdgeAlerts: function() {
+				$this = this;
+
 				// Build
 					if ($('.edge-alerts-overlay').size() === 0) {
 						$('body').prepend($edgeAlerts.css({ 'background-color': this.options.background }));
@@ -141,6 +141,8 @@
 			},
 
 			adjustContent: function() {
+				$this = this;
+
 				// Overlay to viewport
 					$edgeAlerts.css({ 'height': winHeight() });
 
@@ -149,11 +151,16 @@
 			},
 
 			closeEdgeAlerts: function() {
+				$this = this;
+
 				// Before callback
 					this.options.callbackBeforeClose.call(this);
 
 				// Remove
 					$edgeAlerts.fadeOut(this.options.revealSpeed, function() {
+						$popupHead.empty();
+						$popupMessage.empty();
+						$popupButtons.empty();
 						$(this).remove();
 					});
 
@@ -162,6 +169,8 @@
 			},
 
 			edgeAlertsError: function() {
+				$this = this;
+
 				// Callback
 					this.options.callbackError.call(this);
 
